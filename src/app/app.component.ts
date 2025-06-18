@@ -1,25 +1,24 @@
 import { Component, ElementRef, ViewChild, inject , Injectable} from '@angular/core';
-import { RouterOutlet } from '@angular/router';
 import { MatButtonModule} from '@angular/material/button';
 
 import { CommonModule } from '@angular/common';
-import { MatCard, MatCardModule } from '@angular/material/card';
 
-import { MatList, MatListOption, MatListModule , MatSelectionList, MatSelectionListChange} from '@angular/material/list';
-import { MatIcon, MatIconModule } from '@angular/material/icon';
-import { FormsModule } from '@angular/forms';
-import { MatToolbar, MatToolbarModule } from '@angular/material/toolbar';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatListModule ,MatSelectionListChange} from '@angular/material/list';
+import { MatIconModule } from '@angular/material/icon';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinner} from '@angular/material/progress-spinner'
 import { ViewEncapsulation } from '@angular/core';
 import { Award } from './model/Award';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-
+import { environment } from '../environments/environment';
+import { MatCardModule} from '@angular/material/card'
 
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [MatListModule, CommonModule, MatButtonModule, MatIconModule, MatToolbarModule, HttpClientModule, MatCardModule],
+  imports: [MatListModule, CommonModule, MatButtonModule, MatIconModule, MatToolbarModule, HttpClientModule, MatProgressBarModule, MatProgressSpinner, MatCardModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 
@@ -29,9 +28,11 @@ export class AppComponent {
   constructor(private http: HttpClient) {
     this.loadAwards();
   }
+  
   title = 'awards-ui';
-  // private http = inject(HttpClient);
-  // private sanitizer = inject(DomSanitizer);
+  isLoading = false;
+
+
   @ViewChild('awardImage') awardImageRef!: ElementRef<HTMLImageElement>;
 
   // allAwards = [
@@ -54,12 +55,14 @@ export class AppComponent {
 
   loadAwards() {
     console.log("loadAwards called");
-    this.http.get<Award[]>('http://localhost:8080/getAwardsList')
+    this.isLoading = true;
+    this.http.get<Award[]>(`${environment.apiUrl}/getAwardsList`)
       .subscribe({
         next: data => {
           console.info(data);
           this.allAwards = data;
           this.availableAwards = [...this.allAwards];
+          this.isLoading = false;
         },
         error: err => console.error('Failed to load awards', err)
       });
@@ -68,7 +71,7 @@ export class AppComponent {
   get sortedAvailableAwards() {
     return this.availableAwards.slice().sort((a, b) => a.name.localeCompare(b.name));
   }
-  
+
 onAvailableSelectionChange(event: MatSelectionListChange) {
   this.selectedAvailable = event.source.selectedOptions.selected.map(opt => opt.value);
 }
@@ -96,13 +99,15 @@ moveToAvailable() {
 }
 
   getCombinedAward() {
+    this.isLoading = true;
     const ids = this.selectedAwards.map(a => a.id);
     console.log("getCombinedAward selectedIds: " + ids);
-    this.http.post('http://localhost:8080/combine-awards', { awardIds: ids }, { responseType: 'blob' })
+    this.http.post(`${environment.apiUrl}/combine-awards`, { awardIds: ids }, { responseType: 'blob' })
       .subscribe({
         next: blob => {
           const url = URL.createObjectURL(blob);
           this.awardImageRef.nativeElement.src = url;
+          this.isLoading = false;
         },
         error: err => console.error('Error generating image:', err)
       });

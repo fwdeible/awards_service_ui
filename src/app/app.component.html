@@ -1,12 +1,24 @@
+
+<div class="spinner-overlay" *ngIf="isLoading">
+  <mat-progress-spinner
+    diameter="60"
+    mode="indeterminate"
+    color="accent">
+  </mat-progress-spinner>
+</div>
 <div class="page-container">
-  <mat-toolbar color="primary">
-    <span class="title">Military Awards</span>
+  <mat-toolbar color="accent">
+    <span class="title">Digital Ribbon Rack</span>
   </mat-toolbar>
+
+  
+
 
   <div class="description">
     <p>
-      Select your authorized awards on the left and move them to the right, when all selected click "Generate Ribbon Image"
+      Select your authorized awards on the left, use the arrorws to move them to the right
     </p>
+    <p>When all are selected click "Generate Ribbon Image"</p>
   </div>
 
   <div class="transfer-list-container">
@@ -41,14 +53,19 @@
     </mat-list>
   </div>
 
+  <!-- <mat-progress-bar *ngIf="isLoading" mode="indeterminate" style="width:600px"></mat-progress-bar> -->
+
   <div class="actions">
-    <button mat-raised-button color="primary" (click)="getCombinedAward()">
+    <button mat-raised-button color="accent" (click)="getCombinedAward()">
       Generate Ribbon Image
     </button>
   </div>
 
   <div class="preview">
-    <h3>Preview</h3>
     <img #awardImage [src]="'assets/placeholder.png'" alt="Generated award image" />
+  </div>
+
+  <div class="description">
+    <p>Built and maintained by <a href="http://fwdeible.com"> Fran Deible</a> </p>
   </div>
 </div>
